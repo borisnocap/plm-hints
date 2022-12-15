@@ -40,7 +40,7 @@ public class Hint {
         switch (type) {
             // Если аргумент текстовый, то просто возвращается список из одной подсказки.
             case "TEXT" -> {
-                return Lists.newArrayList(type);
+                return Lists.newArrayList(text);
             }
             // Если аругмент представляет из себя никнейм игрока, тогда формируется список онлайн игроков сервера.
             case "PLAYER" -> {
