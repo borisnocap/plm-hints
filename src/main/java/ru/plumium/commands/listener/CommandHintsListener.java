@@ -4,7 +4,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.plugin.Plugin;
-import ru.plumium.commands.entity.CommandWithCustomHint;
+import ru.plumium.commands.entity.CommandWithHint;
 import ru.plumium.commands.entity.Hint;
 
 import java.util.ArrayList;
@@ -13,20 +13,17 @@ import java.util.List;
 
 public class CommandHintsListener implements Listener {
 
-    private final Plugin p;
-
     // Сюда добавляются и хранятся все команды с подсказками, которые зарегистрировали другие плагины.
-    private final HashMap<String, CommandWithCustomHint> commandsWithCustomHints = new HashMap<>();
+    private final HashMap<String, CommandWithHint> commandsWithHint = new HashMap<>();
 
     public CommandHintsListener(Plugin plugin) {
-        p = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     // Метод для добавления новых команд с подсказками.
-    // Нужен, потому что хешмапа commandsWithCustomHints приватная.
-    public void addCommandWithHint(CommandWithCustomHint command) {
-        commandsWithCustomHints.put(command.getCommand(), command);
+    // Нужен, потому что хешмапа commandsWithHint приватная.
+    public void registerNewCommandWithHint(CommandWithHint command) {
+        commandsWithHint.put(command.getCommand(), command);
     }
 
     // Ивент вызывается, когда игрок ввел какую-то команду в чат (еще не отправил) и сервер пытается отправить
@@ -42,13 +39,13 @@ public class CommandHintsListener implements Listener {
         // появляться только после ввода символа пробела.
         boolean lastBufferCharIsSpace = buffer.charAt(buffer.length() - 1) == ' ';
         // Если список команд с подсказками не содержит введенную пользователем команду, просто прекращаем обработку ивента.
-        if (!commandsWithCustomHints.containsKey(bufferArgs[0])) {
+        if (!commandsWithHint.containsKey(bufferArgs[0])) {
             return;
         }
         // Обработка ивента продолжилась, выходит, что введенная пользователем команда имеет кастомные подсказки.
         // Очищаем список предложенных аргументов, стандартные предложения нам не понадобятся вообще.
         event.getCompletions().clear();
-        CommandWithCustomHint command = commandsWithCustomHints.get(bufferArgs[0]);
+        CommandWithHint command = commandsWithHint.get(bufferArgs[0]);
         // Если количество аругментов в буфере равно 1 (то есть введена только сама команда), то мы формируем
         // список аргументов "первого уровня" и отправляем их игроку.
         if (bufferArgs.length == 1) {

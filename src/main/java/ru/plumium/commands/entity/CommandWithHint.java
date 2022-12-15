@@ -2,12 +2,12 @@ package ru.plumium.commands.entity;
 
 import java.util.ArrayList;
 
-public class CommandWithCustomHint {
+public class CommandWithHint {
     private final String command;
 
     private final ArrayList<Hint> hints = new ArrayList<>();
 
-    public CommandWithCustomHint(String commandName) {
+    public CommandWithHint(String commandName) {
         this.command = '/' + commandName;
     }
 
