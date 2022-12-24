@@ -1,4 +1,4 @@
-package ru.plumium.commands;
+package ru.plm.hintcompleter;
 
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;

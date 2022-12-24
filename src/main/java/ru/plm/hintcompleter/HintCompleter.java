@@ -1,4 +1,4 @@
-package ru.plumium.commands;
+package ru.plm.hintcompleter;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
