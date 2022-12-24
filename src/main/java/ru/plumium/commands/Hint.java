@@ -1,4 +1,4 @@
-package ru.plumium.commands.entity;
+package ru.plumium.commands;
 
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
@@ -36,17 +36,13 @@ public class Hint {
     }
 
     public List<String> getText() {
-        // В зависимости от типа аргумента список подсказок формируется по разному.
         switch (type) {
-            // Если аргумент текстовый, то просто возвращается список из одной подсказки.
             case "TEXT" -> {
                 return Lists.newArrayList(text);
             }
-            // Если аругмент представляет из себя никнейм игрока, тогда формируется список онлайн игроков сервера.
             case "PLAYER" -> {
                 return Bukkit.getServer().getOnlinePlayers().stream().map(Player::getName).toList();
             }
-            // Если аргумент имеет тип, для которого нет особого способа обработки аргументов, возвращается пустой список.
             default -> {
                 return List.of();
             }
