@@ -19,7 +19,7 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
         ArrayList<Hint> lastHints = hints;
         HashMap<String, Hint> lastHintsText = new HashMap<>();
         for (Hint hint : lastHints) {
-            hint.getText().forEach(text -> lastHintsText.put(text, hint));
+            hint.getText(commandSender).forEach(text -> lastHintsText.put(text, hint));
         }
         int i = 0;
         while (i < argumentsAmount) {
@@ -32,7 +32,7 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
                     lastHints = currentHint.getChildHints();
                     lastHintsText.clear();
                     for (Hint hint : lastHints) {
-                        hint.getText().forEach(text -> lastHintsText.put(text, hint));
+                        hint.getText(commandSender).forEach(text -> lastHintsText.put(text, hint));
                     }
                 } else {
                     return List.of();
@@ -40,7 +40,7 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
             } else {
                 ArrayList<String> hintsStartsWith = new ArrayList<>();
                 for (Hint currentHint : lastHints) {
-                    List<String> currentHintText = currentHint.getText();
+                    List<String> currentHintText = currentHint.getText(commandSender);
                     hintsStartsWith.addAll(currentHintText.stream().filter(text -> text.toLowerCase().startsWith(currentArgument.toLowerCase())).toList());
                 }
                 if (i != lastArgumentIndex) {

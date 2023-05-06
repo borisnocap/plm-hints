@@ -2,6 +2,7 @@ package ru.plm.hintcompleter;
 
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class Hint {
         return this;
     }
 
-    public List<String> getText() {
+    public List<String> getText(CommandSender commandSender) {
         switch (type) {
             case "TEXT" -> {
                 return Lists.newArrayList(text);
