@@ -19,6 +19,11 @@ public class Hint {
         this.text = text;
     }
 
+    public Hint(HintType type, String text) {
+        this.type = type.toString();
+        this.text = text;
+    }
+
     public String getType() {
         return type;
     }

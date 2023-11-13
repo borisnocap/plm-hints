@@ -30,10 +30,10 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
         /*
         Мапа, которая хранит все возможные значения аргументов и подсказок, к которым они относятся.
         Например:
-            remove, Hint("TEXT", "remove")
-            add, Hint ("TEXT", "add")
-            Player1, Hint("PLAYER", "<игрок>")
-            Player2, Hint("PLAYER", "<игрок>") */
+        remove, Hint("TEXT", "remove")
+        add, Hint ("TEXT", "add")
+        Player1, Hint("PLAYER", "<игрок>")
+        Player2, Hint("PLAYER", "<игрок>") */
         HashMap<String, Hint> currentLevelHintsText = new HashMap<>();
         for (Hint hint : currentLevelHints) {
             hint.getText(commandSender).forEach(text -> currentLevelHintsText.put(text, hint));
@@ -43,44 +43,50 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
         // Нужно пройтись по всем введенным аргументам, начиная с самого первого
         while (i < argumentsAmount) {
             String currentArgument = strings[i];
-            // Если сейчас обрабатывается последний аргумент, и последний аргумент пустой (игрок не ввел ни одного
-            // аргумента), тогда выводим игроку все начальные подсказки
-            if (i == lastArgumentIndex && lastArgumentIsEmpty) {
-                return currentLevelHintsText.keySet().stream().toList();
-            }
             /*
-            Если подсказки текущего уровня имеют тип NUMBER и введенный аргумент состоит только из цифр, и
-            подсказка имеет дочерний уровень подсказок */
-            else if (currentLevelType.equals("NUMBER") && NumberUtils.isDigits(currentArgument) && currentLevelHints.get(0).hasChildHints()) {
-                // Делаю предположение, что на одном уровне может находиться только одна подсказка типа NUMBER
+            Если сейчас обрабатывается последний аргумент, и последний аргумент пустой (игрок не ввел ни одного
+            аргумента), тогда выводим игроку все начальные подсказки */
+            if (i == lastArgumentIndex && lastArgumentIsEmpty)  return currentLevelHintsText.keySet().stream().toList();
+            /*
+            Если подсказки текущего уровня имеют тип NUMBER + введенный аргумент состоит только из цифр + подсказка
+            имеет дочерний уровень подсказок */
+            if (currentLevelType.equals(HintType.NUMBER.toString()) && NumberUtils.isDigits(currentArgument) && currentLevelHints.get(0).hasChildHints()) {
+                /*
+                На одном уровне может находиться только одна подсказка типа NUMBER, поэтому мы можем получить ее
+                с помощью get(0) */
                 currentLevelHints = currentLevelHints.get(0).getChildHints();
                 currentLevelHintsText.clear();
                 for (Hint hint : currentLevelHints) {
                     hint.getText(commandSender).forEach(text -> currentLevelHintsText.put(text, hint));
+                    currentLevelType = hint.getType();
                 }
             }
             // Если среди аргументов текущего уровня есть введенный аргумент (и он полностью введен)
             else if (currentLevelHintsText.containsKey(currentArgument)) {
                 // Получаем подсказку, к которой относится аргумент
                 Hint currentHint = currentLevelHintsText.get(currentArgument);
-                /*
-                Если подсказка имеет дочерние подсказки, тогда обновляем список последних подсказок и мапу аргументов,
-                помещая туда дочерние подсказки */
-                if (currentHint.hasChildHints()) {
-                    currentLevelHints = currentHint.getChildHints();
-                    currentLevelHintsText.clear();
-                    for (Hint hint : currentLevelHints) {
-                        hint.getText(commandSender).forEach(text -> currentLevelHintsText.put(text, hint));
-                    }
-                }
                 // Если у подсказки нет дочерних подсказок, тогда выводим игроку пустой список предложений
-                else {
-                    return List.of();
+                if (!currentHint.hasChildHints()) return List.of();
+                /*
+                Если же подсказка имеет дочерние подсказки, тогда обновляем список последних подсказок и мапу
+                аргументов, помещая туда дочерние подсказки */
+                currentLevelHints = currentHint.getChildHints();
+                currentLevelHintsText.clear();
+                for (Hint hint : currentLevelHints) {
+                    hint.getText(commandSender).forEach(text -> currentLevelHintsText.put(text, hint));
+                    currentLevelType = hint.getType();
                 }
             }
             // Если среди аргументов текущего уровня нет введенного аргумента (возможно он введен частично)
             else {
                 /*
+                Если сейчас обрабатывается не последний введенный аргумент, возвращаем пустой список предложений,
+                потому что не последний аргумент не может быть введен не полностью (у него должны были быть найдены
+                совпадения на предыдущих этапах) */
+                if (i != lastArgumentIndex) return List.of();
+                /*
+                Если же сейчас обрабатывается последний введенный аргумент, возвращаем список предложений, которые
+                начинаются с таким же символов, что и введенный аргумент.
                 Формируем список предложений, которые начинаются так же, как введенный аргумент.
                 Например, допустимыми аргументами текущего уровня являются "add", "remove" и "release".
                 Игроком введен аргумент "rem".
@@ -91,21 +97,14 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
                     List<String> currentHintText = currentHint.getText(commandSender);
                     hintsStartsWith.addAll(currentHintText.stream().filter(text -> text.toLowerCase().startsWith(currentArgument.toLowerCase())).toList());
                 }
-                // Если сейчас обрабатывается не последний введенный аргумент, возвращаем пустой список предложений
-                if (i != lastArgumentIndex) {
-                    return List.of();
-                }
-                /*
-                Если сейчас обрабатывается последний введенный аргумент, возвращаем список предложений, которые
-                начинаются с таким же символов, что и введенный аргумент */
-                else {
-                    return hintsStartsWith;
-                }
+                return hintsStartsWith;
             }
             // После обработки аргумента, переходим к следующему
             i++;
         }
-        // Если во время обработки введенных аргументов не был возвращен список предложений, возвращаем пустой список
+        /*
+        Если игрок ввел аргумент, у этого аргумента имеется дочерний уровень подсказок, но игрок еще не ввел
+        пробел после введенного аргумента, тогда возвращаем ему пустой список предложений */
         return List.of();
     }
 }
