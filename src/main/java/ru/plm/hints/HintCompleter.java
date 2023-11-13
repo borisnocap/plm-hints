@@ -20,10 +20,12 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
         // Последний аргумент может быть пустым, если игрок еще не ввел ни одного аргумента.
         boolean lastArgumentIsEmpty = strings[lastArgumentIndex].isEmpty();
         /*
-        Список последних подсказок, обрабатываемых комплитером.
+        Список подсказок, которых скрипт обрабатывает в данный момент.
         При инициализации сюда помещаются подсказки первого уровня.
         В процессе обработки введенных игроком аргументов в эту могут быть помещены дочерние подсказки */
-        ArrayList<Hint> lastHints = hints;
+        ArrayList<Hint> currentLevelHints = hints;
+        // Тип подсказок текущего уровня (все подсказки одного уровня имеют один тип).
+        String currentLevelType = "TEXT";
         /*
         Мапа, которая хранит все возможные значения аргументов и подсказок, к которым они относятся.
         Например:
@@ -31,9 +33,10 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
             add, Hint ("TEXT", "add")
             Player1, Hint("PLAYER", "<игрок>")
             Player2, Hint("PLAYER", "<игрок>") */
-        HashMap<String, Hint> lastHintsText = new HashMap<>();
-        for (Hint hint : lastHints) {
-            hint.getText(commandSender).forEach(text -> lastHintsText.put(text, hint));
+        HashMap<String, Hint> currentLevelHintsText = new HashMap<>();
+        for (Hint hint : currentLevelHints) {
+            hint.getText(commandSender).forEach(text -> currentLevelHintsText.put(text, hint));
+            currentLevelType = hint.getType();
         }
         int i = 0;
         // Нужно пройтись по всем введенным аргументам, начиная с самого первого
@@ -42,20 +45,20 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
             // Если сейчас обрабатывается последний аргумент, и последний аргумент пустой (игрок не ввел ни одного
             // аргумента), тогда выводим игроку все начальные подсказки
             if (i == lastArgumentIndex && lastArgumentIsEmpty) {
-                return lastHintsText.keySet().stream().toList();
+                return currentLevelHintsText.keySet().stream().toList();
             }
             // Если среди аргументов текущего уровня есть введенный аргумент (и он полностью введен)
-            else if (lastHintsText.containsKey(currentArgument)) {
+            else if (currentLevelHintsText.containsKey(currentArgument)) {
                 // Получаем подсказку, к которой относится аргумент
-                Hint currentHint = lastHintsText.get(currentArgument);
+                Hint currentHint = currentLevelHintsText.get(currentArgument);
                 /*
                 Если подсказка имеет дочерние подсказки, тогда обновляем список последних подсказок и мапу аргументов,
                 помещая туда дочерние подсказки */
                 if (currentHint.hasChildHints()) {
-                    lastHints = currentHint.getChildHints();
-                    lastHintsText.clear();
-                    for (Hint hint : lastHints) {
-                        hint.getText(commandSender).forEach(text -> lastHintsText.put(text, hint));
+                    currentLevelHints = currentHint.getChildHints();
+                    currentLevelHintsText.clear();
+                    for (Hint hint : currentLevelHints) {
+                        hint.getText(commandSender).forEach(text -> currentLevelHintsText.put(text, hint));
                     }
                 }
                 // Если у подсказки нет дочерних подсказок, тогда выводим игроку пустой список предложений
@@ -72,7 +75,7 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
                 Все допустимые аргументы будут проверены на то, что они начинаются с "rem" и подходящие аргументы
                 будут добавлены в список предложений */
                 ArrayList<String> hintsStartsWith = new ArrayList<>();
-                for (Hint currentHint : lastHints) {
+                for (Hint currentHint : currentLevelHints) {
                     List<String> currentHintText = currentHint.getText(commandSender);
                     hintsStartsWith.addAll(currentHintText.stream().filter(text -> text.toLowerCase().startsWith(currentArgument.toLowerCase())).toList());
                 }
