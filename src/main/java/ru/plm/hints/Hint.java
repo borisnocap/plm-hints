@@ -36,14 +36,24 @@ public class Hint {
         return this;
     }
 
+    /**
+     * Метод получения текста подсказки.
+     * У каждого типа подсказки выводится собственный текст.
+     * CommandSender здесь нужен для перегрузки этого метода в ситуации, когда плагин расширяет дефолтные подсказки.
+     * Когда CommandSender является игроком, для подсказки можно будет реализовать какой-нибудь фильтр по нику или типа
+     * того.
+     */
     public List<String> getText(CommandSender commandSender) {
         switch (type) {
+            // Обычный тип подсказки. Примером может являться слово "remove".
             case "TEXT" -> {
                 return Lists.newArrayList(text);
             }
+            // Подсказка такого типа предложит к вводу ники всех онлайн игроков (при этом текст подсказки не используется).
             case "PLAYER" -> {
                 return Bukkit.getServer().getOnlinePlayers().stream().map(Player::getName).toList();
             }
+            // Если тип подсказки не формирует список, тогда возвращаем пустой список предложений.
             default -> {
                 return List.of();
             }
