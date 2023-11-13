@@ -46,7 +46,7 @@ public class Hint {
     public List<String> getText(CommandSender commandSender) {
         switch (type) {
             // Обычный тип подсказки. Примером может являться слово "remove".
-            case "TEXT" -> {
+            case "TEXT", "NUMBER" -> {
                 return Lists.newArrayList(text);
             }
             // Подсказка такого типа предложит к вводу ники всех онлайн игроков (при этом текст подсказки не используется).

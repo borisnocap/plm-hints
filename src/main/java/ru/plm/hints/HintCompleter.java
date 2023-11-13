@@ -1,5 +1,6 @@
 package ru.plm.hints;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -46,6 +47,17 @@ public record HintCompleter(ArrayList<Hint> hints) implements TabCompleter {
             // аргумента), тогда выводим игроку все начальные подсказки
             if (i == lastArgumentIndex && lastArgumentIsEmpty) {
                 return currentLevelHintsText.keySet().stream().toList();
+            }
+            /*
+            Если подсказки текущего уровня имеют тип NUMBER и введенный аргумент состоит только из цифр, и
+            подсказка имеет дочерний уровень подсказок */
+            else if (currentLevelType.equals("NUMBER") && NumberUtils.isDigits(currentArgument) && currentLevelHints.get(0).hasChildHints()) {
+                // Делаю предположение, что на одном уровне может находиться только одна подсказка типа NUMBER
+                currentLevelHints = currentLevelHints.get(0).getChildHints();
+                currentLevelHintsText.clear();
+                for (Hint hint : currentLevelHints) {
+                    hint.getText(commandSender).forEach(text -> currentLevelHintsText.put(text, hint));
+                }
             }
             // Если среди аргументов текущего уровня есть введенный аргумент (и он полностью введен)
             else if (currentLevelHintsText.containsKey(currentArgument)) {
