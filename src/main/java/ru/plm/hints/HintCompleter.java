@@ -1,4 +1,4 @@
-package ru.plm.hintcompleter;
+package ru.plm.hints;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.plm</groupId>
-    <artifactId>plm-hintcompleter</artifactId>
+    <artifactId>plm-hints</artifactId>
     <version>2.0</version>
 
     <properties>

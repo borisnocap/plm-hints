@@ -1,4 +1,4 @@
-package ru.plm.hintcompleter;
+package ru.plm.hints;
 
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
@@ -28,7 +28,7 @@ public class Hint {
     }
 
     public boolean hasChildHints() {
-        return childHints.size() != 0;
+        return !childHints.isEmpty();
     }
 
     public Hint addChildHint(Hint childHint) {
